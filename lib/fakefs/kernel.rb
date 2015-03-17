@@ -9,15 +9,13 @@ module FakeFS
 
     def self.hijack!
       captives[:hijacked].each do |name, prc|
-        ::Kernel.send(:remove_method, name.to_sym)
-        ::Kernel.send(:define_method, name.to_sym, &prc)
+        ::Kernel.define_singleton_method(name.to_sym, &prc)
       end
     end
 
     def self.unhijack!
       captives[:original].each do |name, _prc|
-        ::Kernel.send(:remove_method, name.to_sym)
-        ::Kernel.send(:define_method, name.to_sym, proc do |*args, &block|
+        ::Kernel.define_singleton_method(name.to_sym, proc do |*args, &block|
           ::FakeFS::Kernel.captives[:original][name].call(*args, &block)
         end)
       end
